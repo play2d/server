@@ -5,17 +5,9 @@ ClassMT.Entity = Entity
 
 function lua.lua_pushentity(L, E)
 	lua.lua_pushlightuserdata(L, E)
-	lua.lua_getmetatable(L, -1)
-	
+	lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, "ent_"..E:GetClass())
 	if lua.lua_istable(L, -1) then
-		lua.lua_pop(L, 1)
-	else
-		lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, "ent_"..E:GetClass())
-		if lua.lua_istable(L, -1) then
-			lua.lua_setmetatable(L, -2)
-		else
-			error("UNREGISTERED CLASS "..E:GetClass())
-		end
+		lua.lua_setmetatable(L, -2)
 	end
 end
 

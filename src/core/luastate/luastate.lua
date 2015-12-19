@@ -32,7 +32,7 @@ function LuaState.Load()
 				if lua.lua_istable(L, -1) then
 					lua.lua_getfield(L, -1, "BASE_CLASS")
 					if lua.lua_isstring(L, -1) == 1 then
-						BaseClass = ffi.string(lua.lua_tostring(L, -1))
+						BaseClass = lua.lua_tostring(L, -1)
 						lua.lua_pop(L, 1)
 					end
 					lua.lua_pop(L, 1)
@@ -44,7 +44,7 @@ function LuaState.Load()
 				end
 				
 				if BaseClass then
-					print("Entity '"..Name.."' loaded, inherits from '"..BaseClass.."'")
+					print("Entity '"..Name.."' loaded, inherits from '"..ffi.string(BaseClass).."'")
 				else
 					print("Entity '"..Name.."' loaded")
 				end
@@ -75,6 +75,10 @@ function LuaState.Load()
 			
 			local Name = Path:match("([%w|%_|%d]+)%.lua")
 			if #Name > 0 then
+				
+				lua.lua_newtable(L)
+				lua.lua_setglobal(L, "ENTITY")
+				
 				if lua.luaL_dofile(L, Path) == 0 then
 					local BaseClass
 					
@@ -82,7 +86,7 @@ function LuaState.Load()
 					if lua.lua_istable(L, -1) then
 						lua.lua_getfield(L, -1, "BASE_CLASS")
 						if lua.lua_isstring(L, -1) == 1 then
-							BaseClass = ffi.string(lua.lua_tostring(L, -1))
+							BaseClass = lua.lua_tostring(L, -1)
 							lua.lua_pop(L, 1)
 						end
 						lua.lua_pop(L, 1)
@@ -94,7 +98,7 @@ function LuaState.Load()
 					end
 					
 					if BaseClass then
-						print("Entity '"..Name.."' loaded, inherits from '"..BaseClass.."'")
+						print("Entity '"..Name.."' loaded, inherits from '"..ffi.string(BaseClass).."'")
 					else
 						print("Entity '"..Name.."' loaded")
 					end
@@ -116,10 +120,15 @@ function LuaState.Load()
 		local Key = ffi.string(lua.lua_tostring(L, -1))
 		
 		if Key:sub(1, 4) == "ent_" then
-			lua.lua_pushvalue(L, -2)
+			lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, Key)
+			
+			-- stack[-1] = stack[-2].__index
 			lua.lua_getfield(L, -1, "__index")
 			
+			-- stack[-1] = stack[lua.LUA_REGISTRYINDEX].Entity
 			lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, "Entity")
+			
+			-- setmetatable(stack[-2], stack[-1])
 			lua.lua_setmetatable(L, -2)
 			lua.lua_pop(L, 2)
 		end

@@ -1,0 +1,2 @@
+function ENTITY:Initialize()
+end
