@@ -57,7 +57,7 @@ function Entity.Initialize(L)
 	local Ent = lua.lua_toentity(L, 1)
 	
 	if Ent then
-		Ent:Initialize()
+		Ent:Initialize(unpack(lua.lua_toarguments(L, 2)))
 	end
 	
 	return 0
@@ -74,6 +74,11 @@ function Entity.InitializePhysics(L)
 end
 
 function Entity.CreateRectangleShape(L)
+	local Ent = lua.lua_toentity(L, 1)
+	
+	if Ent then
+		Ent:CreateRectangleShape(unpack(lua.lua_toarguments(L, 2)))
+	end
 	
 	return 0
 end

@@ -120,15 +120,21 @@ function LuaState.Load()
 		local Key = ffi.string(lua.lua_tostring(L, -1))
 		
 		if Key:sub(1, 4) == "ent_" then
+			local BaseClass = "Entity"
+			
 			lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, Key)
-			
-			-- stack[-1] = stack[-2].__index
 			lua.lua_getfield(L, -1, "__index")
+
+			lua.lua_getfield(L, -1, "BASE_CLASS")
+			if lua.lua_isstring(L, -1) then
+				local Class = ffi.string(lua.lua_tostring(L, -1))
+				if #Class > 0 then
+					BaseClass = "ent_"..Class
+				end
+			end
+			lua.lua_pop(L, 1)
 			
-			-- stack[-1] = stack[lua.LUA_REGISTRYINDEX].Entity
-			lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, "Entity")
-			
-			-- setmetatable(stack[-2], stack[-1])
+			lua.lua_getfield(L, lua.LUA_REGISTRYINDEX, BaseClass)
 			lua.lua_setmetatable(L, -2)
 			lua.lua_pop(L, 2)
 		end

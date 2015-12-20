@@ -118,8 +118,6 @@ ffi.cdef [[
 
 	/* access functions (stack -> C) */
 
-	int             (lua_isnumber) (lua_State *L, int idx);
-	int             (lua_isstring) (lua_State *L, int idx);
 	int             (lua_iscfunction) (lua_State *L, int idx);
 	int             (lua_isuserdata) (lua_State *L, int idx);
 	int             (lua_type) (lua_State *L, int idx);
@@ -362,6 +360,10 @@ function lua.lua_getglobal(L, name)
 	lua.lua_getfield(L, lua.LUA_GLOBALSINDEX, name)
 end
 
+function lua.lua_isboolean(L, idx)
+	return lua.lua_type(L, idx) == lua.LUA_TBOOLEAN
+end
+
 function lua.lua_isfunction(L, idx)
 	return lua.lua_type(L, idx) == lua.LUA_TFUNCTION
 end
@@ -370,12 +372,24 @@ function lua.lua_islightuserdata(L, idx)
 	return lua.lua_type(L, idx) == lua.LUA_TLIGHTUSERDATA
 end
 
-function lua.lua_isuserdata(L, idx)
-	return lua.lua_type(L, idx) == lua.LUA_TUSERDATA
+function lua.lua_isnumber(L, idx)
+	return lua.lua_type(L, idx) == lua.LUA_TNUMBER
+end
+
+function lua.lua_isstring(L, idx)
+	return lua.lua_type(L, idx) == lua.LUA_TSTRING
 end
 
 function lua.lua_istable(L, idx)
 	return lua.lua_type(L, idx) == lua.LUA_TTABLE
+end
+
+function lua.lua_isthread(L, idx)
+	return lua.lua_type(L, idx) == lua.LUA_TTHREAD
+end
+
+function lua.lua_isuserdata(L, idx)
+	return lua.lua_type(L, idx) == lua.LUA_TUSERDATA
 end
 
 function lua.lua_pop(L, n)
@@ -384,6 +398,44 @@ end
 
 function lua.lua_pushcfunction(L, f)
 	return lua.lua_pushcclosure(L, f, 0)
+end
+
+function lua.lua_pushrawarguments(L, ...)
+	local Count = 0
+	for _, Value in pairs({...}) do
+		Count = Count + 1
+		lua.lua_pushrawvalue(L, Value)
+	end
+	return Count
+end
+
+function lua.lua_pushrawtable(L, tab)
+	lua.lua_newtable(L)
+	
+	for k, v in pairs(tab) do
+		lua.lua_pushrawvalue(L, k)
+		lua.lua_pushrawvalue(L, v)
+		lua.lua_settable(L, -3)
+	end
+end
+
+function lua.lua_pushrawvalue(L, value)
+	local ValueType = type(value)
+	if ValueType == "string" then
+		lua.lua_pushstring(L, value)
+	elseif ValueType == "number" then
+		lua.lua_pushnumber(L, value)
+	elseif ValueType == "table" then
+		lua.lua_pushrawtable(L, value)
+	elseif ValueType == "userdata" or ValueType == "cdata" then
+		if tostring(Value):sub(1, 25) == "cdata<struct lua_State *>" then
+			lua.lua_pushthread(L, value)
+		else
+			lua.lua_pushlightuserdata(L, value)
+		end
+	elseif ValueType == "boolean" then
+		lua.lua_pushboolean(L, value)
+	end
 end
 
 function lua.lua_register(L, name, f)
@@ -395,8 +447,62 @@ function lua.lua_setglobal(L, s)
 	return lua.lua_setfield(L, lua.LUA_GLOBALSINDEX, s)
 end
 
+function lua.lua_toboolean(L, idx)
+	return LuaLib.lua_toboolean(L, idx) ~= 0
+end
+
 function lua.lua_tostring(L, idx)
 	return lua.lua_tolstring(L, idx, nil)
+end
+
+function lua.lua_totable(L, idx)
+	local Table = {}
+	
+	lua.lua_pushvalue(L, idx)
+	lua.lua_pushnil(L)
+	
+	while lua.lua_next(L, -2) ~= 0 do
+		lua.lua_pushvalue(L, -2)
+		
+		local Key = lua.lua_tovalue(L, -1)
+		local Value = lua.lua_tovalue(L, -2)
+		
+		if Key and Value then
+			Table[Key] = Value
+		end
+		
+		lua.lua_pop(L, 2)
+	end
+	lua.lua_pop(L, 1)
+	
+	return Table
+end
+
+function lua.lua_tovalue(L, idx)
+	if lua.lua_isstring(L, idx) then
+		return ffi.string(lua.lua_tostring(L, idx))
+	elseif lua.lua_isnumber(L, idx) then
+		return tonumber(lua.lua_tonumber(L, idx))
+	elseif lua.lua_istable(L, idx) then
+		return lua.lua_totable(L, idx)
+	elseif lua.lua_isuserdata(L, idx) then
+		return lua.lua_touserdata(L, idx)
+	elseif lua.lua_isboolean(L, idx) then
+		return lua.lua_toboolean(L, idx)
+	elseif lua.lua_isthread(L, idx) then
+		return lua.lua_tothread(L, idx)
+	end
+end
+
+function lua.lua_toarguments(L, idx)
+	local Top = tonumber(lua.lua_gettop(L))
+	local Arguments = {}
+	if Top >= idx then
+		for i = idx, Top do
+			table.insert(Arguments, lua.lua_tovalue(L, i))
+		end
+	end
+	return Arguments
 end
 
 function lua.lua_newtable(L)

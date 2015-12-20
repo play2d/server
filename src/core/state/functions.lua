@@ -49,7 +49,8 @@ function State.CreateEntity(Class, x, y, Angle, ...)
 		
 			if lua.lua_isfunction(L, -1) then
 				lua.lua_pushentity(L, Entity)
-				if lua.lua_pcall(L, 1, 0, 0) ~= 0 then
+				local Args = lua.lua_pushrawarguments(L, ...) + 1
+				if lua.lua_pcall(L, Args, 0, 0) ~= 0 then
 					print("Lua Error ["..Class.."]: "..lua.lua_geterror(L))
 				end
 			else
