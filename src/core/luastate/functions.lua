@@ -2,18 +2,18 @@ local State = Core.LuaState
 local LuaState = Core.LuaState
 
 function LuaState.RegisterFunctions()
+	local L = LuaState.State
+	
 	for Name, F in pairs(LuaState.Function) do
 		if type(F) == "function" then
-			lua.lua_register(LuaState.State, Name, F)
+			lua.lua_register(L, Name, F)
 		elseif type(F) == "table" then
-			lua.lua_newtable(LuaState.State)
+			lua.lua_newtable(L)
 			for Name2, F2 in pairs(F) do
 				lua.lua_pushcfunction(L, F2)
-				lua.lua_setfield(L, -1, Name2)
-				lua.lua_pop(L, 1)
+				lua.lua_setfield(L, -2, Name2)
 			end
-			lua.lua_setglobal(L, -1, Name)
-			lua.lua_pop(L, 1)
+			lua.lua_setglobal(L, Name)
 		end
 	end
 end

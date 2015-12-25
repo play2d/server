@@ -54,10 +54,10 @@ Core.Network.Protocol[CONST.NET.SERVERTRANSFER] = function (Peer, Message)
 				Connection.Stage = CONST.NET.STAGE.GETFILENAME
 			end
 			
-		elseif Connection.Stage == CONST.NET.STAGE.GETSTATE then
+		elseif Connection.Stage == CONST.NET.STAGE.AWAITING then
 			
 			if Byte == CONST.NET.STAGE.JOIN then
-				-- A player has joined to the match
+				-- This player finished downloading game state, make it join to the match
 				
 				Core.State.PlayersConnecting[tostring(Peer)] = nil
 				Core.State.PlayersConnected[tostring(Peer)] = Connection

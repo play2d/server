@@ -7,7 +7,7 @@ require(Path..".format_base")
 require(Path..".format_map")
 
 function Map.Load(Path, FileFormat)
-	local Format = Core.Maps.Format[FileFormat]
+	local Format = Map.Format[FileFormat]
 	local File = io.open(Path, "rb")
 	
 	print("Loading map '"..Path.."'")

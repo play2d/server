@@ -12,13 +12,24 @@ function State.CreateEntity(Class, x, y, Angle, ...)
 			return nil
 		end
 		
+		local L = LuaState.State
+		lua.lua_newtable(L)
+		local Ref = lua.luaL_ref(L, lua.LUA_REGISTRYINDEX)
+		
 		local Entity = ffi.new("struct Entity")
+		Entity.Name = ""
+		Entity.PtrAddress = tostring(Entity):match("cdata<struct Entity>: (.+)")
+		Entity.Address = ""
+		Entity.Class = Class
+		Entity.Health = 0
+		Entity.Armor = 0
+		Entity.Angle = Angle
 		Entity.x = x
 		Entity.y = y
-		Entity.Angle = Angle
 		Entity.ID = EntityID
-		Entity.Class = Class
-		Entity.PtrAddress = tostring(Entity):match("cdata<struct Entity>: (.+)")
+		
+		Entity.LuaStateRef = L
+		Entity.TableRef = Ref
 
 		State.Entities[EntityID] = Entity
 		
@@ -38,9 +49,7 @@ function State.CreateEntity(Class, x, y, Angle, ...)
 		for Address, Connection in pairs(State.PlayersConnected) do
 			Connection.Peer:send(Datagram, CONST.NET.CHANNELS.STATE, "reliable")
 		end
-		
-		local L = LuaState.State
-		
+
 		lua.lua_pushentity(L, Entity)
 		lua.lua_getmetatable(L, -1)
 		if lua.lua_istable(L, -1) then

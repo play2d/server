@@ -81,6 +81,7 @@ Core.Network.Protocol[CONST.NET.PLAYERCONNECT] = function (Peer, Message)
 	local Player = {}
 	Player.Peer = Peer
 	Player.Transfer = {}
+	Player.Code = md5.sumhexa(tostring(Player.Peer))
 	Player.Stage = CONST.NET.STAGE.GETFILELIST
 	
 	Core.State.PlayersConnecting[tostring(Peer)] = Player

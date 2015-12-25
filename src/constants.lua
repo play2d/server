@@ -7,10 +7,12 @@ CONST = {
 			CHECKFILES = 2,
 			GETFILENAME = 3,
 			GETFILE = 4,
-			GETSTATE = 5,
-			CONFIRM = 6,
-			AWAIT = 7,
-			JOIN = 8,
+			GETSTATEENTS = 5,
+			GETSTATEPLYS = 6,
+			GETSTATECVARS = 7,
+			CONFIRM = 8,
+			AWAIT = 9,
+			JOIN = 10,
 			
 			CANCEL = 100,
 		},
@@ -36,8 +38,6 @@ CONST = {
 			CHAT = 4;				-- Chat messages
 			PLAYERS = 5;			-- Game state messages
 			OBJECTS = 6;			-- Game state messages (players, weapons, vehicles, etc)
-			
-			PLAYERSKIN = 7;		-- To receive the player skin faster
 		},
 		
 		-- Message types (reserved for master server)
@@ -48,9 +48,11 @@ CONST = {
 		SERVERINFO = 1001;
 		SERVERTRANSFER = 1002;
 		RCON = 1003;
-		CHATMESSAGE = 1004;
-		SCREENMESSAGE = 1005;
-		USERMESSAGE = 1006;
+		CVARS = 1004;
+		CVAR = 1005;
+		CHATMESSAGE = 1054;
+		SCREENMESSAGE = 1055;
+		USERMESSAGE = 1056;
 		
 		PLAYERCONNECT = 1200;
 		PLAYERCMD = 1201;

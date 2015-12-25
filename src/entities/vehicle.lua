@@ -1,5 +1,5 @@
 function ENTITY:Initialize()
-	self.Passenger = {
+	self:GetTable().Passenger = {
 		{x = 0, y = 0},
 	}
 end
@@ -13,29 +13,33 @@ function ENTITY:IsUsable()
 end
 
 function ENTITY:GetDriver()
+	return self:GetTable().Driver
 end
 
 function ENTITY:SetDriver(Entity)
-	self.Driver = Entity
+	self:GetTable().Driver = Entity
 end
 
 function ENTITY:OnUse(Entity)
-	if self.Driver == Entity then
+	local Driver = self:GetDriver()
+	if Driver == Entity then
 		self:SetDriver(nil)
-	elseif self.Entity == nil or not self.Entity:IsValid() then
+	elseif Driver == nil or not Driver:IsValid() then
 		self:SetDriver(Entity)
 	end
 end
 
 function ENTITY:GetPassenger(Index)
-	local Passenger = self.Passenger[Index]
+	local Table = self:GetTable()
+	local Passenger = Table.Passenger[Index]
 	if Passenger then
 		return Passenger.Entity
 	end
 end
 
 function ENTITY:SetPassenger(Index, Entity)
-	local Passenger = self.Passenger[Index]
+	local Table = self:GetTable()
+	local Passenger = Table.Passenger[Index]
 	if Passenger then
 		Passenger.Entity = Entity
 	end

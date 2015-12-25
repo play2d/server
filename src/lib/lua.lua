@@ -372,6 +372,10 @@ function lua.lua_islightuserdata(L, idx)
 	return lua.lua_type(L, idx) == lua.LUA_TLIGHTUSERDATA
 end
 
+function lua.lua_isnil(L, idx)
+	return lua.lua_type(L, idx) == lua.LUA_TNIL
+end
+
 function lua.lua_isnumber(L, idx)
 	return lua.lua_type(L, idx) == lua.LUA_TNUMBER
 end
@@ -428,8 +432,11 @@ function lua.lua_pushrawvalue(L, value)
 	elseif ValueType == "table" then
 		lua.lua_pushrawtable(L, value)
 	elseif ValueType == "userdata" or ValueType == "cdata" then
-		if tostring(Value):sub(1, 25) == "cdata<struct lua_State *>" then
+		local ToString = tostring(Value)
+		if ToString:sub(1, 25) == "cdata<struct lua_State *>" then
 			lua.lua_pushthread(L, value)
+		elseif ToString:sub(1, 20) == "cdata<struct Entity>" or ToString:sub(1, 22) == "cdata<struct Entity *>" then
+			lua.lua_pushentity(L, value)
 		else
 			lua.lua_pushlightuserdata(L, value)
 		end
@@ -464,8 +471,8 @@ function lua.lua_totable(L, idx)
 	while lua.lua_next(L, -2) ~= 0 do
 		lua.lua_pushvalue(L, -2)
 		
-		local Key = lua.lua_tovalue(L, -1)
-		local Value = lua.lua_tovalue(L, -2)
+		local Key = lua.lua_torawvalue(L, -1)
+		local Value = lua.lua_torawvalue(L, -2)
 		
 		if Key and Value then
 			Table[Key] = Value
@@ -478,7 +485,7 @@ function lua.lua_totable(L, idx)
 	return Table
 end
 
-function lua.lua_tovalue(L, idx)
+function lua.lua_torawvalue(L, idx)
 	if lua.lua_isstring(L, idx) then
 		return ffi.string(lua.lua_tostring(L, idx))
 	elseif lua.lua_isnumber(L, idx) then
@@ -499,7 +506,7 @@ function lua.lua_toarguments(L, idx)
 	local Arguments = {}
 	if Top >= idx then
 		for i = idx, Top do
-			table.insert(Arguments, lua.lua_tovalue(L, i))
+			table.insert(Arguments, lua.lua_torawvalue(L, i))
 		end
 	end
 	return Arguments

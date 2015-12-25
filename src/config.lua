@@ -45,4 +45,14 @@ function Config.Save()
 		end
 		File:close()
 	end
+	
+	local File = io.open("sys/cvars.cfg", "w")
+	if File then
+		for Command, CVar in pairs(Core.State.ConVars) do
+			if CVar.Save == ffi.TRUE then
+				File:write(Command.." "..string.format("%q", ffi.string(CVar.Value)).."\n")
+			end
+		end
+		File:close()
+	end
 end

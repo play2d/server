@@ -2,6 +2,10 @@ local State = Core.State
 local LuaState = Core.LuaState
 
 function LuaState.Renew()
+	if LuaState.State then
+		lua.lua_close(LuaState.State)
+	end
+	
 	LuaState.State = lua.luaL_newstate()
 	lua.luaL_openlibs(LuaState.State)
 	
@@ -57,8 +61,8 @@ function LuaState.Load()
 		end
 	end
 	
-	print("Loading coded entities")
 	for _, Addon in pairs(State.Addons.List) do
+		print("------------------------------------------------------")
 		for _, Path in pairs(Addon.Autorun.SV) do
 			if lua.luaL_dofile(L, Path) ~= 0 then
 				print("Lua Error: "..lua.lua_geterror(L))

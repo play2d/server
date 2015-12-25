@@ -51,6 +51,7 @@ function State.Renew()
 	State.Mode = "Play2D"
 	State.Start = love.timer.getTime()
 	
+	State.ConVars = {}
 	State.PlayersConnecting = {}		-- This should store an array of the connected peers of players connecting
 	State.PlayersConnected = {}		-- This should store an array of the connected peers of the players
 	State.Players = {}					-- This should store an array of entities

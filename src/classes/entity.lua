@@ -4,7 +4,6 @@ local LuaState = Core.LuaState
 ffi.cdef [[
 	typedef struct Entity {
 		const char * Name;
-		const char * Type;
 		const char * PtrAddress;
 		const char * Address;
 		const char * Class;
@@ -15,6 +14,8 @@ ffi.cdef [[
 		double y;
 		unsigned int ID;
 		
+		lua_State * LuaStateRef;
+		int TableRef;
 		Proxy * PhysObj;
 	}
 ]]
@@ -30,6 +31,7 @@ function Metatable:__gc()
 		PhysObj:destroy()
 		LuaState.BodyReference[self.PhysObj] = nil
 	end
+	lua.luaL_unref(self.LuaStateRef, self.TableRef)
 end
 
 ffi.metatype("struct Entity", Metatable)
@@ -226,6 +228,14 @@ end
 if CLIENT then
 	
 	function Entity:Move(x, y)
+		if type(x) == "number" and type(y) == "number" then
+			local PhysObj = self:GetPhysicsObject()
+			if PhysObj then
+				PhysObj:setPosition(x, y)
+			else
+				self.x, self.y = x, y
+			end
+		end
 	end
 
 elseif SERVER then
@@ -334,8 +344,37 @@ elseif SERVER then
 	
 end
 
-function Entity:GetName()
-	return self.Name or ""
+if CLIENT then
+	
+	function Entity:SetHealth(Health)
+		if type(Health) == "number" then
+			self.Health = Health
+		end
+	end
+	
+elseif SERVER then
+	
+	function Entity:SetHealth(Health)
+		if type(Health) == "number" then
+			self.Health = Health
+			
+			local Datagram = ("")
+				:WriteShort(CONST.NET.ENTITYHEALTH)
+				:WriteInt24(self.ID)
+				:WriteInt(Health)
+				
+			for Adress, Connection in pairs(State.PlayersConnected) do
+				Connection.Peer:send(Datagram, CONST.NET.CHANNELS.OBJECTS, "reliable")
+			end
+			
+			return true
+		end
+	end
+	
+end
+
+function Entity:GetHealth()
+	return tonumber(self.Health)
 end
 
 if CLIENT then
@@ -457,6 +496,28 @@ elseif SERVER then
 end
 
 function Entity:Update(dt)
+	if self:IsValid() then
+		local L = LuaState.State
+		
+		lua.lua_pushentity(L, Entity)
+		lua.lua_getmetatable(L, -1)
+		if lua.lua_istable(L, -1) then
+			lua.lua_pop(L, 1)
+			lua.lua_getfield(L, -1, "Update")
+		
+			if lua.lua_isfunction(L, -1) then
+				lua.lua_pushentity(L, Entity)
+				if lua.lua_pcall(L, 1, 0, 0) ~= 0 then
+					print("Lua Error ["..Class.."]: "..lua.lua_geterror(L))
+				end
+			else
+				error("No update function found for "..Class)
+			end
+		else
+			error("UNREGISTERED CLASS "..Class)
+		end
+		
+	end
 end
 
 if CLIENT then
@@ -572,7 +633,7 @@ function Entity:IsWeapon()
 end
 
 function Entity:IsValid()
-	if self.ID == nil then
+	if self.ID == ffi.NULL then
 		return false
 	end
 	

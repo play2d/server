@@ -1,5 +1,5 @@
 DEFINE_BASECLASS("CS2DENTITY")
 
 function ENTITY:Initialize(Entity)
-	self:TestFunction("penis", {hello = "kitty"}, 123)
+	self:SetPosition(Entity.Position.x * 32 + 16, Entity.Position.y * 32 + 16)
 end
