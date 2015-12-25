@@ -6,7 +6,7 @@ function love.conf(t)
 	t.window = false
 	t.modules.audio = true
 	t.modules.event = false
-	t.modules.graphics = false
+	t.modules.graphics = true
 	t.modules.image = true
 	t.modules.joystick = false
 	t.modules.keyboard = false
@@ -18,6 +18,8 @@ function love.conf(t)
 	t.modules.timer = true
 	t.modules.window = false
 	t.modules.thread = true
+	t.modules.touch = false
+	t.modules.video = true
 end
 
 function love.run()
