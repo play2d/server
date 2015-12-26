@@ -107,6 +107,16 @@ end
 function ConVar:Delete()
 	local Name = ffi.string(self.Name)
 	if #Name > 0 then
-		Core.State.ConVars[Name] = nil
+		local ConVars = Core.State.ConVars
+		local CVar = ConVars[Name]
+		if CVar then
+			ConVars[Name] = nil
+			
+			local Datagram = ("")
+				:WriteShort(CONST.NET.CVARDEL)
+				:WriteLine(Name)
+			
+			Core.Network.SendPlayers(Datagram, CONST.NET.CHANNELS.CVARS, "reliable")
+		end
 	end
 end

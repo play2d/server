@@ -7,7 +7,8 @@ function ConVar.Create(L)
 	local Name = ffi.string(lua.luaL_checkstring(L, 1))
 	
 	if #Name > 0 then
-		local CVar = Core.State.ConVars[Name]
+		local ConVars = Core.State.ConVars
+		local CVar = ConVars[Name]
 		if not CVar then
 			local CVar = ffi.new("struct ConVar")
 			CVar.Name = Name
@@ -15,7 +16,13 @@ function ConVar.Create(L)
 			CVar.Save = false
 			CVar.SendToClient = false
 			
-			Core.State.ConVars[Name] = CVar
+			ConVars[Name] = CVar
+			
+			local Datagram = ("")
+				:WriteShort(CONST.NET.CVARNEW)
+				:WriteLine(Name)
+			
+			Core.Network.SendPlayers(Datagram, CONST.NET.CHANNELS.CVARS, "reliable")
 		end
 		
 		lua.lua_pushcvar(L, CVar)
@@ -43,7 +50,10 @@ function ConVar.Delete(L)
 	local Name = ffi.string(lua.luaL_checkstring(L, 1))
 	
 	if #Name > 0 then
-		Core.State.ConVars[Name] = nil
+		local CVar = Core.State.ConVars[Name]
+		if CVar then
+			CVar:Delete()
+		end
 	end
 	
 	return 0

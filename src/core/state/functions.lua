@@ -46,9 +46,7 @@ function State.CreateEntity(Class, x, y, Angle, ...)
 			:WriteInt24(#Encoded)
 			:WriteString(Encoded)
 		
-		for Address, Connection in pairs(State.PlayersConnected) do
-			Connection.Peer:send(Datagram, CONST.NET.CHANNELS.STATE, "reliable")
-		end
+		Core.Network.SendPlayers(Datagram, CONST.NET.CHANNELS.OBJECTS, "reliable")
 
 		lua.lua_pushentity(L, Entity)
 		lua.lua_getmetatable(L, -1)

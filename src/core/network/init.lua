@@ -60,3 +60,16 @@ function Network.Update()
 		end
 	end
 end
+
+
+function Network.SendPlayers(Datagram, Channel, Flags)
+	for Address, Connection in pairs(Core.State.PlayersConnected) do
+		Connection.Peer:send(Datagram, Channel, Flags)
+	end
+	
+	for Address, Connection in pairs(Core.State.PlayersConnecting) do
+		if Connection.Sync then
+			Connection.Peer:send(Datagram, Channel, Flags)
+		end
+	end
+end
