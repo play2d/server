@@ -6,6 +6,7 @@ Transfer.Stage[CONST.NET.STAGE.GETFILENAME] = function (Connection)
 		Connection.Transfer[Index] = nil
 		if File.Handle then
 			CurrentTransfer = File
+			break
 		end
 	end
 	
@@ -22,12 +23,16 @@ Transfer.Stage[CONST.NET.STAGE.GETFILENAME] = function (Connection)
 		local Datagram = ("")
 			:WriteShort(CONST.NET.SERVERTRANSFER)
 			:WriteByte(CONST.NET.STAGE.GETFILENAME)
-			:WriteLine(Current.Transfer.Path)
-			:WriteInt(Current.Transfer.Size)
-			:WriteLine(Current.Transfer.Checksum) -- MD5 hash
+			:WriteLine(CurrentTransfer.Path)
+			:WriteInt(CurrentTransfer.Size)
+			:WriteLine(CurrentTransfer.Checksum) -- MD5 hash
+		
+		print("Sending file '"..CurrentTransfer.Path.."' ("..CurrentTransfer.Size.." bytes)")
+		
 		Connection.Peer:send(Datagram, CONST.NET.CHANNELS.CONNECTING, "reliable")
 	else
 		Connection.Stage = CONST.NET.STAGE.GETSTATEENTS
+		Connection.Sync = true
 		
 		Connection.EntityQueue = {}
 		for ID, Entity in pairs(Core.State.Entities) do

@@ -36,28 +36,26 @@ function Network.Load()
 end
 
 function Network.Update()
-	if Network.Host then
-		for _, Host in pairs(Network.Hosts) do
-			local Event = Host:service(1)
-			while Event do
-				if Event.type == "receive" then
-					local Message = Event.data
-					local PacketType
-					
-					PacketType, Message = Message:ReadShort()
-					local Function = Network.Protocol[PacketType]
-					if Function then
-						Function(Event.peer, Message)
-					end
-				elseif Event.type == "connect" then
-					Hook.Call("ENetConnect", Event.peer)
-				elseif Event.type == "disconnect" then
-					Hook.Call("ENetDisconnect", Event.peer)
+	for _, Host in pairs(Network.Hosts) do
+		local Event = Host:service(1)
+		while Event do
+			if Event.type == "receive" then
+				local Message = Event.data
+				local PacketType
+				
+				PacketType, Message = Message:ReadShort()
+				local Function = Network.Protocol[PacketType]
+				if Function then
+					Function(Event.peer, Message)
 				end
-				Event = Host:service()
+			elseif Event.type == "connect" then
+				Hook.Call("ENetConnect", Event.peer)
+			elseif Event.type == "disconnect" then
+				Hook.Call("ENetDisconnect", Event.peer)
 			end
-			Host:flush()
+			Event = Host:service()
 		end
+		Host:flush()
 	end
 end
 

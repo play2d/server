@@ -21,33 +21,30 @@ Core.Network.Protocol[CONST.NET.SERVERTRANSFER] = function (Peer, Message)
 				end
 			end
 			
-		elseif Connection.Stage == CONST.NET.STAGE.CONNECTING then
+		elseif Byte == CONST.NET.STAGE.CONNECTING then
+			-- The list of files that the client requires
+			local Transfer = {}
 			
-			if Byte == CONST.NET.STAGE.CONNECTING then
-				-- The list of files that the client requires
-				local Transfer = {}
+			while #Message > 0 do
+				local Path
+				Path, Message = Message:ReadLine()
 				
-				while #Message > 0 do
-					local Path
-					Path, Message = Message:ReadLine()
-					
-					for _, File in pairs(Connection.Transfer) do
-						if File.Path == Path then
-							File.Required = true
-							break
-						end
+				for _, File in pairs(Connection.Transfer) do
+					if File.Path == Path then
+						File.Required = true
+						break
 					end
 				end
+			end
 				
-				for Index, File in pairs(Connection.Transfer) do
-					if not File.Required then
-						File.Handle:close()
-						Connection.Transfer[Index] = nil
-					end
+			for Index, File in pairs(Connection.Transfer) do
+				if not File.Required then
+					File.Handle:close()
+					Connection.Transfer[Index] = nil
 				end
-				Connection.Stage = CONST.NET.STAGE.GETFILENAME
 			end
 			
+			Connection.Stage = CONST.NET.STAGE.GETFILENAME
 		elseif Connection.Stage == CONST.NET.STAGE.CONFIRM then
 			
 			if Byte == CONST.NET.STAGE.CONFIRM then

@@ -6,7 +6,7 @@ Transfer.Stage[CONST.NET.STAGE.CONNECTING] = function (Connection)
 		if not File.Checksum then
 			-- Generate file info
 			if File.Path:sub(1, 4) == "src/" then
-				File.Size = 0
+				File.Size = love.filesystem.getSize(File.Path) or 0
 				File.Handle = love.filesystem.newFile(File.Path, "r")
 			else
 				File.Size = lfs.attributes(File.Path, "size")
@@ -34,7 +34,7 @@ Transfer.Stage[CONST.NET.STAGE.CONNECTING] = function (Connection)
 			:WriteByte(CONST.NET.STAGE.CONNECTING)
 			
 		for Index, File in pairs(Connection.Transfer) do
-			Transfer = Transfer
+			Datagram = Datagram
 				:WriteLine(File.Path)
 				:WriteInt(File.Size)
 				:WriteLine(File.Checksum)	-- MD5 hash

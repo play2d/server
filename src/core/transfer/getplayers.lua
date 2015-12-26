@@ -1,15 +1,13 @@
 local Transfer = Core.Transfer
 
 Transfer.Stage[CONST.NET.STAGE.GETSTATEPLYS] = function (Connection)
-	local Datagram = ("")
-		:WriteShort(CONST.NET.SERVERTRANSFER)
-		:WriteByte(CONST.NET.STAGE.GETSTATEPLYS)
-	
 	local Index, Player = next(Connection.PlayerQueue)
 	if Player then
 		Connection.PlayerQueue[Index] = nil
 		
-		Datagram = Datagram
+		Datagram = ("")
+			:WriteShort(CONST.NET.SERVERTRANSFER)
+			:WriteByte(CONST.NET.STAGE.GETSTATEPLYS)
 			:WriteByte(Connection.PlayerQueueSize)
 			:WriteLine(Player.Code)
 			:WriteLine(Player.Name)
@@ -21,7 +19,7 @@ Transfer.Stage[CONST.NET.STAGE.GETSTATEPLYS] = function (Connection)
 	else
 		Connection.PlayerQueue = nil
 		Connection.PlayerQueueSize = nil
-		Connection.Stage = CONST.NET.STAGE.CVARS
+		Connection.Stage = CONST.NET.STAGE.GETSTATECVARS
 		
 		Connection.CVarQueue = {}
 		for CVarName, CVar in pairs(Core.State.ConVars) do

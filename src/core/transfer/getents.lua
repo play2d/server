@@ -1,10 +1,6 @@
 local Transfer = Core.Transfer
 
 Transfer.Stage[CONST.NET.STAGE.GETSTATEENTS] = function (Connection)
-	local Datagram = ("")
-		:WriteShort(CONST.NET.SERVERTRANSFER)
-		:WriteByte(CONST.NET.STAGE.GETSTATEENTS)
-		
 	local Index, Entity = next(Connection.EntityQueue)
 	if Entity then
 		Connection.EntityQueue[Index] = nil
@@ -13,14 +9,16 @@ Transfer.Stage[CONST.NET.STAGE.GETSTATEENTS] = function (Connection)
 		local Encoded = json.encode(Data)
 		
 		local x, y = Entity:GetPosition()
-		Datagram = Datagram
+		Datagram = ("")
+			:WriteShort(CONST.NET.SERVERTRANSFER)
+			:WriteByte(CONST.NET.STAGE.GETSTATEENTS)
 			:WriteInt24(Connection.EntityQueueSize)
-			:WriteInt24(Entity.ID)
-			:WriteLine(Entity.Class)
+			:WriteInt24(Entity:GetID())
+			:WriteLine(Entity:GetClass())
 			:WriteInt(x)
 			:WriteInt(y)
 			:WriteShort(Entity:GetAngle() + 360)
-			:WriteInt24(#Data)
+			:WriteInt24(#Encoded)
 			:WriteString(Encoded)
 		
 		Connection.Peer:send(Datagram, CONST.NET.CHANNELS.CONNECTING, "reliable")
