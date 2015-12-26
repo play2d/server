@@ -15,5 +15,6 @@ Transfer.Stage[CONST.NET.STAGE.GETFILE] = function (Connection)
 		Connection.CurrentTransfer.Handle:close()
 		Connection.CurrentTransfer = nil
 		Connection.Stage = CONST.NET.STAGE.CONFIRM
+		Connection.Sync = true
 	end
 end

@@ -63,6 +63,7 @@ Core.Network.Protocol[CONST.NET.SERVERTRANSFER] = function (Peer, Message)
 				Core.State.PlayersConnected[tostring(Peer)] = Connection
 				
 				Connection.Transfer = nil
+				Connection.Sync = nil
 				
 				Hook.Call("PlayerJoin", tostring(Peer))
 			end

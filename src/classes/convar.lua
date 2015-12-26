@@ -72,7 +72,9 @@ elseif SERVER then
 		end
 		
 		for Address, Connection in pairs(Core.State.PlayersConnecting) do
-			Connection.Peer:send(Datagram)
+			if Connection.Sync then
+				Connection.Peer:send(Datagram)
+			end
 		end
 	end
 	

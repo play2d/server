@@ -10,7 +10,7 @@ function Commands.FindFunction(Name)
 	local CVar = Core.State.ConVars[Name]
 	if CVar then
 		return function (Source, Value)
-			CVar.Value = tostring(Value)
+			CVar:Set(Value)
 		end
 	end
 end

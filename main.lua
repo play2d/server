@@ -46,6 +46,3 @@ function love.update(dt)
 	Core.Update(dt)
 	Hook.Call("update", dt)
 end
-
-Video = love.video.newVideoStream("small.ogv")
-print(Video)
