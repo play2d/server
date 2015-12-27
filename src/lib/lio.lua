@@ -1,23 +1,20 @@
-local FileMetatable = debug.getregistry()["FILE*"]
+local FileMetatable = debug.getregistry()["File"]
 local File = FileMetatable.__index
-local FileSeek = File.seek
+local FileRead = File.read
 
 function File:size()
-	local CurrentPosition = self:seek("cur")
-	local Size = self:seek("end")
-	FileSeek(self, "set", CurrentPosition)
-	return Size
-end
-
-function File:seek(whence, offset)
-	if type(whence) == "number" then
-		return FileSeek(self, "set", offset)
-	end
-	return FileSeek(self, whence, offset)
+	return self:getSize()
 end
 
 function File:eof()
-	return self:seek() >= self:size()
+	return self:isEOF()
+end
+
+function File:read(n)
+	if n == "*a" then
+		return FileRead(self)
+	end
+	return FileRead(self, n)
 end
 
 function File:ReadByte()

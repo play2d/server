@@ -5,21 +5,25 @@ Transfer.Stage[CONST.NET.STAGE.CONNECTING] = function (Connection)
 	for Index, File in pairs(Connection.Transfer) do
 		if not File.Checksum then
 			-- Generate file info
-			if File.Path:sub(1, 4) == "src/" then
-				File.Size = love.filesystem.getSize(File.Path) or 0
-				File.Handle = love.filesystem.newFile(File.Path, "r")
-			else
-				File.Size = lfs.attributes(File.Path, "size")
-				File.Handle = io.open(File.Path, "rb")
+			if not File.Handle then
+				if File.Path:sub(1, 4) == "src/" then
+					File.Size = love.filesystem.getSize(File.Path) or 0
+					File.Handle = love.filesystem.newFile(File.Path, "r")
+				else
+					File.Size = lfs.attributes(File.Path, "size")
+					File.Handle = io.open(File.Path, "rb")
+				end
+				File.Content = ""
 			end
-			
-			local Content = ""
-			while not File.Handle:eof() do
-				Content = Content .. File.Handle:read("*a")
-			end
-			File.Checksum = md5.sumhexa(Content)
 			
 			if File.Handle then
+				File.Content = File.Content .. File.Handle:read("*a")
+				if File.Handle:eof() then
+					File.Checksum = md5.sumhexa(File.Content)
+					File.Content = nil
+					File.Handle:seek(0)
+				end
+
 				GeneratingInfo = true
 				break
 			else
