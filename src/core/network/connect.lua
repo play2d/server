@@ -1,5 +1,6 @@
 Core.Network.Protocol[CONST.NET.PLAYERCONNECT] = function (Peer, Message)
-	local IP = tostring(Peer):match("(.+)%:")
+  local Address = tostring(Peer)
+	local IP = Address:match("(.+)%:")
 	local Name, Message = Message:ReadLine()		-- Check name ban
 	local Login, Message = Message:ReadLine()		-- Later, we'll check this login.
 	local Version, Message = Message:ReadLine()
@@ -10,8 +11,13 @@ Core.Network.Protocol[CONST.NET.PLAYERCONNECT] = function (Peer, Message)
 		:WriteShort(CONST.NET.PLAYERCONNECT)
 	
 	local Time = love.timer.getTime()
+  
+  if #Name == 0 then
+    print("Invalid login attempt from "..Address)
+    return nil
+  end
 	
-	print("Received join attempt from "..tostring(Peer)..": "..Name.." ("..Login..")")
+	print("Received join attempt from "..Address..": "..Name.." ("..Login..")")
 	
 	if Core.Bans.IsIPBanned(IP) then
 		-- Check IP ban
@@ -81,9 +87,12 @@ Core.Network.Protocol[CONST.NET.PLAYERCONNECT] = function (Peer, Message)
 	local Player = {}
 	Player.Peer = Peer
 	Player.Transfer = {}
-	Player.Code = md5.sumhexa(tostring(Player.Peer))
+	Player.Code = md5.sumhexa(Address)
 	Player.Stage = CONST.NET.STAGE.GETFILELIST
-	
-	Core.State.PlayersConnecting[tostring(Peer)] = Player
+  Player.Address = Address
+  Player.IP = IP
+  Player.MicPort = MicrophonePort
+  Player.ID = Core.Network.AddConnecting(Peer, Player)
+
 	print("Join attempt accepted")
 end

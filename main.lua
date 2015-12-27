@@ -1,5 +1,3 @@
-local Start = love.timer.getTime()
-
 game = {
 	VERSION = "0.0.0.1a",
 	CODENAME = "LuaJIT Rox",
@@ -36,9 +34,7 @@ function love.load(arg)
 	Core.Load()
 
 	print("######################################################")
-	print("Server started in "..math.floor((love.timer.getTime() - Start)*1000).." ms")
-	
-	Start = nil
+
 	love.load = nil
 end
 

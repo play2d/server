@@ -66,16 +66,8 @@ elseif SERVER then
 			:WriteLine(ffi.string(self.Name))
 			:WriteShort(#StringValue)
 			:WriteString(StringValue)
-		
-		for Address, Connection in pairs(Core.State.PlayersConnected) do
-			Connection.Peer:send(Datagram)
-		end
-		
-		for Address, Connection in pairs(Core.State.PlayersConnecting) do
-			if Connection.Sync then
-				Connection.Peer:send(Datagram)
-			end
-		end
+
+    Network.SendPlayers(Datagram, CONST.NET.CHANNELS.CVARS, "reliable")
 	end
 	
 end

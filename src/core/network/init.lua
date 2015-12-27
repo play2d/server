@@ -3,6 +3,7 @@ Core.Network.Hosts = {}
 
 local Path = ...
 local Network = Core.Network
+local State = Core.State
 
 -- Hooks
 Hook.Create("ENetConnect")
@@ -59,15 +60,75 @@ function Network.Update()
 	end
 end
 
+function Network.FindConnecting(Peer)
+  local ID = Peer:connect_id()
+  if ID then
+    return State.PlayersConnecting[ID]
+  end
+end
+
+function Network.FindConnected(Peer)
+  local ID = Peer:connect_id()
+  if ID then
+    return State.PlayersConnected[ID]
+  end
+end
+
+function Network.RemoveConnected(Peer)
+  local ID = Peer:connect_id()
+  if ID then
+    State.PlayersConnected[ID] = nil
+  end
+end
+
+function Network.RemoveConnecting(Peer)
+  local ID = Peer:connect_id()
+  if ID then
+    State.PlayersConnecting[ID] = nil
+  end
+end
+
+function Network.RemoveConnection(Peer)
+  local ID = Peer:connect_id()
+  if ID then
+    State.PlayersConnected[ID] = nil
+    State.PlayersConnecting[ID] = nil
+  end
+end
+
+function Network.AddConnected(Peer, Connection)
+  local ID = Peer:connect_id()
+  if ID then
+    State.PlayersConnecting[ID] = Connection
+  end
+  return ID
+end
+
+function Network.AddConnecting(Peer, Connection)
+  local ID = Peer:connect_id()
+  if ID then
+    State.PlayersConnecting[ID] = Connection
+  end
+  return ID
+end
 
 function Network.SendPlayers(Datagram, Channel, Flags)
-	for Address, Connection in pairs(Core.State.PlayersConnected) do
+	for ID, Connection in pairs(State.PlayersConnected) do
 		Connection.Peer:send(Datagram, Channel, Flags)
 	end
 	
-	for Address, Connection in pairs(Core.State.PlayersConnecting) do
+	for ID, Connection in pairs(State.PlayersConnecting) do
 		if Connection.Sync then
 			Connection.Peer:send(Datagram, Channel, Flags)
 		end
 	end
+end
+
+function Network.ForEachConnection(Function)
+  if State.PlayersConnected then
+    table.foreach(State.PlayersConnected, Function)
+  end
+  if State.PlayersConnecting then
+    table.foreach(State.PlayersConnecting, Function)
+  end
 end
