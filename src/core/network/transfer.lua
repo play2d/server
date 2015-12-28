@@ -8,7 +8,7 @@ Core.Network.Protocol[CONST.NET.SERVERTRANSFER] = function (Peer, Message)
 		if Byte == CONST.NET.STAGE.CANCEL then
 			-- Join process cancelled
 			
-      Core.Network.RemoveConnection(Peer)
+			Core.Network.RemoveConnection(Peer)
 			Peer:disconnect()
 			
 			if Connection.Transfer then
@@ -19,7 +19,7 @@ Core.Network.Protocol[CONST.NET.SERVERTRANSFER] = function (Peer, Message)
 					Connection.Transfer[Index] = nil
 				end
 			end
-      
+			
 		elseif Byte == CONST.NET.STAGE.CONNECTING then
 			-- The list of files that the client requires
 			local Transfer = {}
@@ -40,8 +40,8 @@ Core.Network.Protocol[CONST.NET.SERVERTRANSFER] = function (Peer, Message)
 				if not File.Required then
 					File.Handle:close()
 					Connection.Transfer[Index] = nil
-        else
-          File.Required = nil
+				else
+					File.Required = nil
 				end
 			end
 			
@@ -56,13 +56,13 @@ Core.Network.Protocol[CONST.NET.SERVERTRANSFER] = function (Peer, Message)
 			
 			if Byte == CONST.NET.STAGE.JOIN then
 				-- This player finished downloading game state, make it join to the match
-        
-        Connection.Score = 0
-        Connection.Kills = 0
-        Connection.Deaths = 0
+				
+				Connection.Score = 0
+				Connection.Kills = 0
+				Connection.Deaths = 0
 
-        Core.Network.RemoveConnecting(Peer)
-        Core.Network.AddConnected(Peer, Connection)
+				Core.Network.RemoveConnecting(Peer)
+				Core.Network.AddConnected(Peer, Connection)
 				
 				Connection.Transfer = nil
 				Connection.Sync = nil

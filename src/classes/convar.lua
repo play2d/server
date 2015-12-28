@@ -67,7 +67,7 @@ elseif SERVER then
 			:WriteShort(#StringValue)
 			:WriteString(StringValue)
 
-    Network.SendPlayers(Datagram, CONST.NET.CHANNELS.CVARS, "reliable")
+		Network.SendPlayers(Datagram, CONST.NET.CHANNELS.CVARS, "reliable")
 	end
 	
 end

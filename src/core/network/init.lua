@@ -61,55 +61,55 @@ function Network.Update()
 end
 
 function Network.FindConnecting(Peer)
-  local ID = Peer:connect_id()
-  if ID then
-    return State.PlayersConnecting[ID]
-  end
+	local ID = Peer:connect_id()
+	if ID then
+		return State.PlayersConnecting[ID]
+	end
 end
 
 function Network.FindConnected(Peer)
-  local ID = Peer:connect_id()
-  if ID then
-    return State.PlayersConnected[ID]
-  end
+	local ID = Peer:connect_id()
+	if ID then
+		return State.PlayersConnected[ID]
+	end
 end
 
 function Network.RemoveConnected(Peer)
-  local ID = Peer:connect_id()
-  if ID then
-    State.PlayersConnected[ID] = nil
-  end
+	local ID = Peer:connect_id()
+	if ID then
+		State.PlayersConnected[ID] = nil
+	end
 end
 
 function Network.RemoveConnecting(Peer)
-  local ID = Peer:connect_id()
-  if ID then
-    State.PlayersConnecting[ID] = nil
-  end
+	local ID = Peer:connect_id()
+	if ID then
+		State.PlayersConnecting[ID] = nil
+	end
 end
 
 function Network.RemoveConnection(Peer)
-  local ID = Peer:connect_id()
-  if ID then
-    State.PlayersConnected[ID] = nil
-    State.PlayersConnecting[ID] = nil
-  end
+	local ID = Peer:connect_id()
+	if ID then
+		State.PlayersConnected[ID] = nil
+		State.PlayersConnecting[ID] = nil
+	end
 end
 
 function Network.AddConnected(Peer, Connection)
-  local ID = Peer:connect_id()
-  if ID then
-    State.PlayersConnecting[ID] = Connection
-  end
-  return ID
+	local ID = Peer:connect_id()
+	if ID then
+		State.PlayersConnecting[ID] = Connection
+	end
+	return ID
 end
 
 function Network.AddConnecting(Peer, Connection)
-  local ID = Peer:connect_id()
-  if ID then
-    State.PlayersConnecting[ID] = Connection
-  end
-  return ID
+	local ID = Peer:connect_id()
+	if ID then
+		State.PlayersConnecting[ID] = Connection
+	end
+	return ID
 end
 
 function Network.SendPlayers(Datagram, Channel, Flags)
@@ -125,10 +125,10 @@ function Network.SendPlayers(Datagram, Channel, Flags)
 end
 
 function Network.ForEachConnection(Function)
-  if State.PlayersConnected then
-    table.foreach(State.PlayersConnected, Function)
-  end
-  if State.PlayersConnecting then
-    table.foreach(State.PlayersConnecting, Function)
-  end
+	if State.PlayersConnected then
+		table.foreach(State.PlayersConnected, Function)
+	end
+	if State.PlayersConnecting then
+		table.foreach(State.PlayersConnecting, Function)
+	end
 end

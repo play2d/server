@@ -16,14 +16,14 @@ function State.Renew()
 	local Datagram = ("")
 		:WriteShort(CONST.NET.CHANGEMAP)
 		:WriteLine(Config.CFG["sv_map"])
-  
-  Core.Network.ForEachConnection(
-    function (ID, Connection)
-      Core.Network.RemoveConnection(Connection.Peer)
-      Connection.Peer:send(Datagram, CONST.NET.CHANNELS.MAP, "reliable")
-      Connection.Peer:disconnect_later()
-      
-      if Connection.Transfer then
+	
+	Core.Network.ForEachConnection(
+		function (ID, Connection)
+			Core.Network.RemoveConnection(Connection.Peer)
+			Connection.Peer:send(Datagram, CONST.NET.CHANNELS.MAP, "reliable")
+			Connection.Peer:disconnect_later()
+			
+			if Connection.Transfer then
 				for Index, File in pairs(Connection.Transfer) do
 					if File.Handle then
 						File.Handle:close()
@@ -31,8 +31,8 @@ function State.Renew()
 					Connection.Transfer[Index] = nil
 				end
 			end
-    end
-  )
+		end
+	)
 	
 	if not State.Map then
 		error("FAILED TO LOAD MAP")
@@ -85,11 +85,11 @@ function State.Reset()
 	local Datagram = ("")
 		:WriteShort(CONST.NET.RESTARTMAP)
 	
-  Core.Network.ForEachConnection(
-    function (ID, Connection)
-      Connection.Peer:send(Datagram, CONST.NET.CHANNELS.STATE, "reliable")
-    end
-  )
+	Core.Network.ForEachConnection(
+		function (ID, Connection)
+			Connection.Peer:send(Datagram, CONST.NET.CHANNELS.STATE, "reliable")
+		end
+	)
 	
 	Hook.Call("StartRound")
 end
