@@ -12,12 +12,12 @@ Core.Network.Protocol[CONST.NET.PLAYERCONNECT] = function (Peer, Message)
 	
 	local Time = love.timer.getTime()
 	
+	print("Received join attempt from "..Address..": "..Name.." ("..Login..")")
+	
 	if #Name == 0 then
-		print("Invalid login attempt from "..Address)
+		print("Join attempt rejected, invalid name")
 		return nil
 	end
-	
-	print("Received join attempt from "..Address..": "..Name.." ("..Login..")")
 	
 	if Core.Bans.IsIPBanned(IP) then
 		-- Check IP ban

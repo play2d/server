@@ -70,6 +70,8 @@ Core.Network.Protocol[CONST.NET.SERVERTRANSFER] = function (Peer, Message)
 				Connection.Score = 0
 				Connection.Kills = 0
 				Connection.Deaths = 0
+				
+				print(Connection.Name.." has joined to the server")
 
 				Core.Network.RemoveConnecting(Peer)
 				Core.Network.AddConnected(Peer, Connection)
