@@ -53,6 +53,7 @@ function Network.Update()
 				Hook.Call("ENetConnect", Event.peer)
 			elseif Event.type == "disconnect" then
 				Hook.Call("ENetDisconnect", Event.peer)
+				Network.RemoveConnection(Event.peer)
 			end
 			Event = Host:service()
 		end
@@ -84,7 +85,18 @@ end
 function Network.RemoveConnecting(Peer)
 	local ID = Peer:connect_id()
 	if ID then
-		State.PlayersConnecting[ID] = nil
+		local Connection = State.PlayersConnecting[ID]
+		if Connection then
+			if Connection.Transfer then
+				for Index, File in pairs(Connection.Transfer) do
+					if File.Handle then
+						File.Handle:close()
+					end
+					Connection.Transfer[Index] = nil
+				end
+			end
+			State.PlayersConnecting[ID] = nil
+		end
 	end
 end
 
@@ -92,7 +104,19 @@ function Network.RemoveConnection(Peer)
 	local ID = Peer:connect_id()
 	if ID then
 		State.PlayersConnected[ID] = nil
-		State.PlayersConnecting[ID] = nil
+		
+		local Connection = State.PlayersConnecting[ID]
+		if Connection then
+			if Connection.Transfer then
+				for Index, File in pairs(Connection.Transfer) do
+					if File.Handle then
+						File.Handle:close()
+					end
+					Connection.Transfer[Index] = nil
+				end
+			end
+			State.PlayersConnecting[ID] = nil
+		end
 	end
 end
 

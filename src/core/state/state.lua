@@ -19,18 +19,9 @@ function State.Renew()
 	
 	Core.Network.ForEachConnection(
 		function (ID, Connection)
-			Core.Network.RemoveConnection(Connection.Peer)
 			Connection.Peer:send(Datagram, CONST.NET.CHANNELS.MAP, "reliable")
 			Connection.Peer:disconnect_later()
-			
-			if Connection.Transfer then
-				for Index, File in pairs(Connection.Transfer) do
-					if File.Handle then
-						File.Handle:close()
-					end
-					Connection.Transfer[Index] = nil
-				end
-			end
+			Core.Network.RemoveConnection(Connection.Peer)
 		end
 	)
 	

@@ -25,7 +25,11 @@ function File:ReadByte()
 end
 
 function File:ReadShort()
-	return self:read(2):ReadShort()
+	local Short = self:read(2)
+	if Short then
+		return Short:ReadShort()
+	end
+	return 0
 end
 
 function File:ReadInt24()
@@ -49,7 +53,16 @@ function File:ReadString(Size)
 end
 
 function File:ReadLine()
-	return self:read("*l")
+	local Line = ""
+	while not self:eof() do
+		local Character = self:read(1):byte()
+		if Character == 10 then
+			break
+		elseif Character ~= 13 then
+			Line = Line .. string.char(Character)
+		end
+	end
+	return Line
 end
 
 function File:WriteByte(n)

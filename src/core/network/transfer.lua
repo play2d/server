@@ -52,10 +52,20 @@ Core.Network.Protocol[CONST.NET.SERVERTRANSFER] = function (Peer, Message)
 				Connection.Stage = CONST.NET.STAGE.GETFILENAME
 			end
 			
-		elseif Connection.Stage == CONST.NET.STAGE.AWAIT then
+		elseif Connection.Stage == CONST.NET.STAGE.JOIN then
 			
 			if Byte == CONST.NET.STAGE.JOIN then
 				-- This player finished downloading game state, make it join to the match
+				
+				Connection.Transfer = nil
+				Connection.Sync = nil
+				
+				local Datagram = ("")
+					:WriteShort(CONST.NET.PLAYERJOIN)
+					:WriteInt(Connection.ID)
+					:WriteLine(Connection.Name)
+					
+				Core.Network.SendPlayers(Datagram, CONST.NET.CHANNELS.PLAYERS, "reliable")
 				
 				Connection.Score = 0
 				Connection.Kills = 0
@@ -63,9 +73,6 @@ Core.Network.Protocol[CONST.NET.SERVERTRANSFER] = function (Peer, Message)
 
 				Core.Network.RemoveConnecting(Peer)
 				Core.Network.AddConnected(Peer, Connection)
-				
-				Connection.Transfer = nil
-				Connection.Sync = nil
 				
 				Hook.Call("PlayerJoin", Connection.ID)
 			end

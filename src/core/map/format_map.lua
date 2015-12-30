@@ -58,7 +58,7 @@ Format.EntName = {
 }
 
 function Format.Load(Path, File)
-	local Header = File:read("*l")
+	local Header = File:ReadLine()
 	if Header:sub(1, 44) ~= "Unreal Software's Counter-Strike 2D Map File" then
 		return nil, "Not a Counter-Strike 2D Map File"
 	end
@@ -76,43 +76,48 @@ function Format.Load(Path, File)
 	}
 
 	for i = 1, 10 do
-		Map.Byte[i] = File:read(1):ReadByte()
+		Map.Byte[i] = File:ReadByte()
 	end
 	
 	for i = 1, 10 do
-		Map.Int[i] = File:read(4):ReadInt()
+		Map.Int[i] = File:ReadInt()
 	end
 	
 	for i = 1, 10 do
-		Map.String[i] = File:read("*l")
+		Map.String[i] = File:ReadLine()
 	end
 	
-	Map.Info = File:read("*l")
-	Map.Tileset = File:read("*l")
-	Map.TilesRequired = File:read(1):ReadByte()
-	Map.Width = File:read(4):ReadInt()
-	Map.Height = File:read(4):ReadInt()
-	Map.Background.File = File:read("*l")
+	Map.Info = File:ReadLine()
+	Map.Tileset = File:ReadLine()
+	Map.TilesRequired = File:ReadByte()
+	Map.Width = File:ReadInt()
+	Map.Height = File:ReadInt()
+	Map.Background.File = File:ReadLine()
 	Map.Background.Scroll = {
-		x = File:read(4):ReadInt(),
-		y = File:read(4):ReadInt(),
+		x = File:ReadInt(),
+		y = File:ReadInt(),
 	}
 	Map.Background.Color = {
-		R = File:read(1):ReadByte(),
-		G = File:read(1):ReadByte(),
-		B = File:read(1):ReadByte(),
+		R = File:ReadByte(),
+		G = File:ReadByte(),
+		B = File:ReadByte(),
 	}
 	
-	if File:read("*l"):sub(1, -2) ~= "ed.erawtfoslaernu" then
+	local Header = File:ReadLine()
+	if Header ~= "ed.erawtfoslaernu" then
 		return nil, "Header damaged"
 	end
 	
 	for i = 0, Map.TilesRequired do
-		Map.TileMode[i] = File:read(1):ReadByte()
+		Map.TileMode[i] = File:ReadByte()
 	end
 	
 	if CLIENT then
-		Map.TilesetImage = love.graphics.newImage(Map.Tileset)
+		Map.TilesetImage = love.graphics.newImage("gfx/tiles/"..Map.Tileset)
+		if not Map.TilesetImage then
+			return nil, "Failed to load image: gfx/tiles/"..Map.Tileset.." "..#Map.Tileset
+		end
+		
 		local TileIndex = 0
 		for y = 0, math.floor(Map.TilesetImage:getHeight()/32) do
 			for x = 0, math.floor(Map.TilesetImage:getWidth()/32) do
@@ -125,50 +130,49 @@ function Format.Load(Path, File)
 	for x = 0, Map.Width do
 		Map.Tile[x] = {}
 		for y = 0, Map.Height do
-			Map.Tile[x][y] = {File:read(1):ReadByte()}
+			Map.Tile[x][y] = {File:ReadByte()}
 		end
 	end
 	
 	if Map.Byte[2] == 1 then
 		for x = 0, Map.Width do
 			for y = 0, Map.Height do
-				local Modifier = File:read(1):ReadByte()
+				local Modifier = File:ReadByte()
 				local HAS64BIT = Modifier % 128 >= 64
 				local HAS128BIT = Modifier % 256 >= 128
 				if HAS64BIT or HAS128BIT then
 					if HAS64BIT and HAS128BIT then
-						File:read("*l")
+						File:ReadLine()
 					elseif HAS64BIT and not HAS128BIT then
 						-- Frame for tile modification
-						Map.Tile[x][y][2] = File:read(1):ReadByte()
+						Map.Tile[x][y][2] = File:ReadByte()
 					elseif not HAS64BIT and HAS128BIT then
 						-- Red, green, blue, overlay frame
-						Map.Tile[x][y][3] = File:read(1):ReadByte()
-						Map.Tile[x][y][4] = File:read(1):ReadByte()
-						Map.Tile[x][y][5] = File:read(1):ReadByte()
-						Map.Tile[x][y][6] = File:read(1):ReadByte()
+						Map.Tile[x][y][3] = File:ReadByte()
+						Map.Tile[x][y][4] = File:ReadByte()
+						Map.Tile[x][y][5] = File:ReadByte()
+						Map.Tile[x][y][6] = File:ReadByte()
 					end
 				end
 			end
 		end
 	end
 	
-	local Entities = File:read(4):ReadInt()
+	local Entities = File:ReadInt()
 	for i = 1, Entities do
-		local Entity = {
-			Name = File:read("*l"),
-			Type = File:read(1):ReadByte(),
-			Position = {
-				x = File:read(4):ReadInt(),
-				y = File:read(4):ReadInt(),
-			},
-			Trigger = File:read("*l"),
-			Int = {},
-			String = {},
-		}
+		local Entity = {}
+		Entity.Name = File:ReadLine()
+		Entity.Type = File:ReadByte()
+		Entity.Position = {}
+		Entity.Position.x = File:ReadInt()
+		Entity.Position.y = File:ReadInt()
+		Entity.Trigger = File:ReadLine()
+		Entity.Int = {}
+		Entity.String = {}
+
 		for i = 1, 10 do
-			Entity.Int[i] = File:read(4):ReadInt()
-			Entity.String[i] = File:read("*l")
+			Entity.Int[i] = File:ReadInt()
+			Entity.String[i] = File:ReadLine()
 		end
 		table.insert(Map.Entity, Entity)
 	end
@@ -231,9 +235,7 @@ function Format:GenerateHorizontalShapes(Mode)
 	local Shapes = {}
 	while true do
 		local Shape = {}
-		local ShapeGenerated
-		
-		local Start
+
 		for Index, P in pairs(AvailablePoints) do
 			AvailablePoints[Index] = nil
 			if not Point[P.x][P.y] then
@@ -298,9 +300,7 @@ function Format:GenerateVerticalShapes(Mode)
 	local Shapes = {}
 	while true do
 		local Shape = {}
-		local ShapeGenerated
-		
-		local Start
+
 		for Index, P in pairs(AvailablePoints) do
 			AvailablePoints[Index] = nil
 			if not Point[P.x][P.y] then
@@ -367,6 +367,7 @@ function Format:GenerateWorld()
 	self.World = love.physics.newWorld()
 	
 	self.WorldBody = love.physics.newBody(self.World, 0, 0)
+	self.WorldBody:setType("static")
 	
 	local WallShapes = self:GenerateShapes(1)
 	local ObstacleShapes = self:GenerateShapes(2)

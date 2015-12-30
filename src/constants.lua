@@ -34,7 +34,7 @@ CONST = {
 			CONNECTING = 1;
 			MAP = 2;
 			
-			STATE = 3;				-- Use this to handle all entity creation/remove
+			STATE = 3;
 			CHAT = 4;				-- Chat messages
 			PLAYERS = 5;			-- Game state messages
 			OBJECTS = 6;			-- Game state messages (players, weapons, vehicles, etc)

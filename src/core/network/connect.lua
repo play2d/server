@@ -92,6 +92,7 @@ Core.Network.Protocol[CONST.NET.PLAYERCONNECT] = function (Peer, Message)
 	Player.Address = Address
 	Player.IP = IP
 	Player.MicPort = MicrophonePort
+	Player.Name = Name
 	Player.ID = Core.Network.AddConnecting(Peer, Player)
 
 	print("Join attempt accepted")

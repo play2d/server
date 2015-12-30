@@ -80,3 +80,20 @@ function Entities.GetAll(L)
 	lua.lua_pushrawtable(L, Core.State.Entities)
 	return 1
 end
+
+function Entities.EachEntity(L)
+	local EachEntity = Core.State.EachEntity()
+	
+	lua.lua_pushcfunction(L,
+		function (L)
+			local Entity = EachEntity()
+			if Entity then
+				lua.lua_pushentity(L, Entity)
+				return 1
+			end
+			return 0
+		end
+	)
+	
+	return 1
+end

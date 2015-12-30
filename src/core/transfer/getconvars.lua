@@ -17,11 +17,6 @@ Transfer.Stage[CONST.NET.STAGE.GETSTATECVARS] = function (Connection)
 		
 		Connection.Peer:send(Datagram, CONST.NET.CHANNELS.CONNECTING, "reliable")
 	else
-		local Datagram = ("")
-			:WriteShort(CONST.NET.SERVERTRANSFER)
-			:WriteByte(CONST.NET.STAGE.AWAIT)
-		
 		Connection.Stage = CONST.NET.STAGE.AWAIT
-		Connection.Peer:send(Datagram, CONST.NET.CHANNELS.CONNECTING, "reliable")
 	end
 end

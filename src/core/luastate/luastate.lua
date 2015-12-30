@@ -9,6 +9,9 @@ function LuaState.Renew()
 	LuaState.State = lua.luaL_newstate()
 	lua.luaL_openlibs(LuaState.State)
 	
+	lua.lua_pushboolean(LuaState.State, true)
+	lua.lua_setglobal(LuaState.State, "SERVER")
+	
 	LuaState.BodyReference = {}
 	LuaState.Hooks = {}
 
@@ -21,7 +24,7 @@ function LuaState.Load()
 
 	print("Loading core entities")
 	for k, File in pairs(love.filesystem.getDirectoryItems("src/entities")) do
-		local Name = File:match("(.+)%plua")
+		local Name = File:match("(.+)%.lua")
 		if #Name > 0 then
 			local Path = "src/entities/"..File
 			local File = love.filesystem.newFile(Path, "r")
@@ -106,8 +109,6 @@ function LuaState.Load()
 					else
 						print("Entity '"..Name.."' loaded")
 					end
-					
-					table.insert(State.Transfer, Path)
 				else
 					print("Lua Error: "..lua.lua_geterror(L))
 				end
