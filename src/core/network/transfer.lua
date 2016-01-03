@@ -1,5 +1,3 @@
-Hook.Create("PlayerJoin")
-
 Core.Network.Protocol[CONST.NET.SERVERTRANSFER] = function (Peer, Message)
 	local Connection = Core.Network.FindConnecting(Peer)
 	if Connection then

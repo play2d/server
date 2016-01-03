@@ -1,7 +1,6 @@
+local Network = Core.Network
 local State = Core.State
 local LuaState = Core.LuaState
-
-Hook.Create("StartRound")
 
 function State.Load()
 	print("Starting server...")
@@ -17,11 +16,11 @@ function State.Renew()
 		:WriteShort(CONST.NET.CHANGEMAP)
 		:WriteLine(Config.CFG["sv_map"])
 	
-	Core.Network.ForEachConnection(
+	Network.ForEachConnection(
 		function (ID, Connection)
 			Connection.Peer:send(Datagram, CONST.NET.CHANNELS.MAP, "reliable")
 			Connection.Peer:disconnect_later()
-			Core.Network.RemoveConnection(Connection.Peer)
+			Network.RemoveConnection(Connection.Peer)
 		end
 	)
 	
@@ -76,7 +75,7 @@ function State.Reset()
 	local Datagram = ("")
 		:WriteShort(CONST.NET.RESTARTMAP)
 	
-	Core.Network.ForEachConnection(
+	Network.ForEachConnection(
 		function (ID, Connection)
 			Connection.Peer:send(Datagram, CONST.NET.CHANNELS.STATE, "reliable")
 		end
@@ -98,3 +97,14 @@ function State.Update(dt)
 
 	State.Map.World:update(dt)
 end
+
+function State.Disconnected(Peer)
+	local Connection = Network.FindConnected(Peer)
+	if Connection then
+		print(Connection.Name.." dropped from the server")
+		Hook.Call("PlayerLeave", Connection.ID)
+		Network.RemoveConnection(Peer)
+	end
+end
+
+Hook.Add("ENetDisconnect", State.Disconnected)

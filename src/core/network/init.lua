@@ -5,10 +5,6 @@ local Path = ...
 local Network = Core.Network
 local State = Core.State
 
--- Hooks
-Hook.Create("ENetConnect")
-Hook.Create("ENetDisconnect")
-
 -- Master server messages
 require(Path..".master_ping")
 
@@ -53,7 +49,6 @@ function Network.Update()
 				Hook.Call("ENetConnect", Event.peer)
 			elseif Event.type == "disconnect" then
 				Hook.Call("ENetDisconnect", Event.peer)
-				Network.RemoveConnection(Event.peer)
 			end
 			Event = Host:service()
 		end

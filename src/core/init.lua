@@ -8,6 +8,16 @@ Core.Transfer = {}
 Core.Maps = {}
 Core.Bans = {}
 
+Hook.Create("StartRound")
+
+-- Network hooks
+Hook.Create("ENetConnect")
+Hook.Create("ENetDisconnect")
+
+-- Player hooks
+Hook.Create("PlayerLeave")
+Hook.Create("PlayerJoin")
+
 require(Path..".state")
 require(Path..".luastate")
 require(Path..".network")
